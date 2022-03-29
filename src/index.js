@@ -1022,36 +1022,9 @@ const initialize = async () => {
    * Sign Typed Data V4
    */
   signTypedDataV4.onclick = async () => {
-    const networkId = parseInt(networkDiv.innerHTML, 10);
-    const chainId = parseInt(chainIdDiv.innerHTML, 16) || networkId;
+    // const networkId = parseInt(networkDiv.innerHTML, 10);
+    // const chainId = parseInt(chainIdDiv.innerHTML, 16) || networkId;
     const msgParams = {
-      domain: {
-        chainId: chainId.toString(),
-        name: 'Ether Mail',
-        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-        version: '1',
-      },
-      message: {
-        contents: 'Hello, Bob!',
-        from: {
-          name: 'Cow',
-          wallets: [
-            '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-            '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF',
-          ],
-        },
-        to: [
-          {
-            name: 'Bob',
-            wallets: [
-              '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-              '0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57',
-              '0xB0B0b0b0b0b0B000000000000000000000000000',
-            ],
-          },
-        ],
-      },
-      primaryType: 'Mail',
       types: {
         EIP712Domain: [
           { name: 'name', type: 'string' },
@@ -1059,28 +1032,60 @@ const initialize = async () => {
           { name: 'chainId', type: 'uint256' },
           { name: 'verifyingContract', type: 'address' },
         ],
-        Group: [
-          { name: 'name', type: 'string' },
-          { name: 'members', type: 'Person[]' },
-        ],
-        Mail: [
-          { name: 'from', type: 'Person' },
-          { name: 'to', type: 'Person[]' },
-          { name: 'contents', type: 'string' },
-        ],
-        Person: [
-          { name: 'name', type: 'string' },
-          { name: 'wallets', type: 'address[]' },
+        MakerOrder: [
+          { name: 'isOrderAsk', type: 'bool' },
+          { name: 'signer', type: 'address' },
+          { name: 'collection', type: 'address' },
+          { name: 'price', type: 'uint256' },
+          { name: 'tokenId', type: 'uint256' },
+          { name: 'amount', type: 'uint256' },
+          { name: 'strategy', type: 'address' },
+          { name: 'currency', type: 'address' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'startTime', type: 'uint256' },
+          { name: 'endTime', type: 'uint256' },
+          { name: 'minPercentageToAsk', type: 'uint256' },
+          { name: 'params', type: 'bytes' },
         ],
       },
+      primaryType: 'MakerOrder',
+      domain: {
+        name: 'WardenExchange',
+        version: '1',
+        chainId: '97',
+        verifyingContract: '0xeBfc009964efEe725823FcEe0B9C656Be6EaE191',
+      },
+      message: {
+        isOrderAsk: true,
+        signer: accounts[0],
+        collection: '0x23adA77E0B2a623596650e3Df7733E48269fc6AD',
+        price: '10000000000000000',
+        tokenId: '0',
+        amount: '1',
+        strategy: '0x1d6A3632DF693caDf4EfCb695ccAe255B45C2763',
+        currency: '0x0792A14582D71CCd728A2d0215C941fa5F44C83c',
+        nonce: '0',
+        startTime: '1647310479',
+        endTime: '9648853299',
+        minPercentageToAsk: '8500',
+        params: '0x',
+      },
     };
+    console.log('messages', msgParams.message);
+    console.log('account', accounts[0]);
+
     try {
       const from = accounts[0];
       const sign = await ethereum.request({
         method: 'eth_signTypedData_v4',
         params: [from, JSON.stringify(msgParams)],
       });
-      signTypedDataV4Result.innerHTML = sign;
+
+      console.log('sign', sign);
+      const r = '0x'.concat(sign.slice(2, 66));
+      const s = '0x'.concat(sign.slice(66, 130));
+      const v = sign.slice(130);
+      signTypedDataV4Result.innerHTML = `v: ${v}, r: ${r}, s: ${s}`;
       signTypedDataV4Verify.disabled = false;
     } catch (err) {
       console.error(err);
@@ -1096,51 +1101,42 @@ const initialize = async () => {
     const chainId = parseInt(chainIdDiv.innerHTML, 16) || networkId;
     const msgParams = {
       domain: {
-        chainId,
-        name: 'Ether Mail',
-        verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+        chainId: chainId.toString(),
+        name: 'WardenExchange',
+        verifyingContract: '0x00eC0604E618f3AEbF501EACD24F97377a5e96D7',
         version: '1',
       },
       message: {
-        contents: 'Hello, Bob!',
-        from: {
-          name: 'Cow',
-          wallets: [
-            '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-            '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF',
-          ],
-        },
-        to: [
-          {
-            name: 'Bob',
-            wallets: [
-              '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-              '0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57',
-              '0xB0B0b0b0b0b0B000000000000000000000000000',
-            ],
-          },
-        ],
+        isOrderAsk: true,
+        signer: accounts[0],
+        collection: '0x23adA77E0B2a623596650e3Df7733E48269fc6AD',
+        price: '10000000000000000',
+        tokenId: '0',
+        amount: '1',
+        strategy: '0x1d6A3632DF693caDf4EfCb695ccAe255B45C2763',
+        currency: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        nonce: '0',
+        startTime: '1647310479',
+        endTime: '1648853299',
+        minPercentageToAsk: '8500',
+        params: '0x',
       },
-      primaryType: 'Mail',
+      primaryType: 'MakerOrder',
       types: {
-        EIP712Domain: [
-          { name: 'name', type: 'string' },
-          { name: 'version', type: 'string' },
-          { name: 'chainId', type: 'uint256' },
-          { name: 'verifyingContract', type: 'address' },
-        ],
-        Group: [
-          { name: 'name', type: 'string' },
-          { name: 'members', type: 'Person[]' },
-        ],
-        Mail: [
-          { name: 'from', type: 'Person' },
-          { name: 'to', type: 'Person[]' },
-          { name: 'contents', type: 'string' },
-        ],
-        Person: [
-          { name: 'name', type: 'string' },
-          { name: 'wallets', type: 'address[]' },
+        MakerOrder: [
+          { name: 'isOrderAsk', type: 'bool' },
+          { name: 'signer', type: 'address' },
+          { name: 'collection', type: 'address' },
+          { name: 'price', type: 'uint256' },
+          { name: 'tokenId', type: 'uint256' },
+          { name: 'amount', type: 'uint256' },
+          { name: 'strategy', type: 'address' },
+          { name: 'currency', type: 'address' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'startTime', type: 'uint256' },
+          { name: 'endTime', type: 'uint256' },
+          { name: 'minPercentageToAsk', type: 'uint256' },
+          { name: 'params', type: 'bytes' },
         ],
       },
     };
